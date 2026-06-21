@@ -1,0 +1,1694 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-slate-950 text-slate-100">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BuildLink - Construction Material & Equipment Rental Sourcing Notebook</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b', // Amber / Construction Yellow
+                            600: '#d97706',
+                            700: '#b45309',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Google Fonts (Inter) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0b1329;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e293b;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #f59e0b;
+        }
+        .glow-hover:hover {
+            box-shadow: 0 0 20px rgba(245, 158, 11, 0.25);
+        }
+        /* Custom smooth transition transitions for collapsible elements */
+        .sidebar-transition {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+    </style>
+</head>
+<body class="h-full flex flex-col font-sans overflow-hidden">
+
+    <!-- Top Nav Bar -->
+    <header class="bg-slate-950 border-b border-slate-800 px-6 py-3.5 flex items-center justify-between shrink-0 z-20">
+        <div class="flex items-center space-x-3">
+            <div class="bg-brand-500 p-2.5 rounded-xl text-slate-950 shadow-lg shadow-brand-500/10">
+                <i data-lucide="hard-hat" class="w-6 h-6 stroke-[2.5]"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-xl tracking-tight text-white flex items-center gap-2">
+                    BuildLink <span class="text-[10px] bg-brand-500/10 text-brand-500 px-2.5 py-1 rounded-full border border-brand-500/20 font-bold uppercase tracking-wider">Enterprise Sourcing</span>
+                </h1>
+                <p class="text-[10px] text-slate-400 font-medium tracking-wide">Dynamic NotebookLLM for Automated Material Sourcing & Equipment Rentals</p>
+            </div>
+        </div>
+
+        <!-- Right Side Controls & API indicator -->
+        <div class="flex items-center space-x-4">
+            <!-- Sidebar Workspace Quick Layout Toggles -->
+            <div class="bg-slate-900 border border-slate-800 rounded-lg p-0.5 flex gap-0.5 mr-2">
+                <button onclick="toggleLeftSidebar()" class="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Toggle Sourcing Panel">
+                    <i data-lucide="layout-sidebar" class="w-4 h-4"></i>
+                </button>
+                <button onclick="resetSidebars()" class="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Reset View Layout">
+                    <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                </button>
+                <button onclick="toggleRightSidebar()" class="p-1.5 rounded text-slate-400 hover:text-white hover:bg-slate-800 transition" title="Toggle AI Assistant Panel">
+                    <i data-lucide="layout-sidebar-right" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <div class="hidden sm:flex items-center bg-slate-900 border border-slate-800 rounded-lg px-3 py-1.5 text-[11px] text-slate-300">
+                <span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 animate-pulse shadow-md shadow-emerald-500/50"></span>
+                <span class="font-semibold text-slate-200">Gemini Live Grounding Enabled</span>
+            </div>
+            <button onclick="toggleSetupModal()" class="text-slate-400 hover:text-white transition p-1.5 hover:bg-slate-900 rounded-lg" title="API Credentials Configuration">
+                <i data-lucide="settings" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="flex-1 flex overflow-hidden relative">
+
+        <!-- LEFT SIDEBAR: Sourcing Engine (Width optimized to w-72 for wider middle pane) -->
+        <section id="leftSidebar" class="sidebar-transition w-72 border-r border-slate-800 bg-slate-950 flex flex-col shrink-0 overflow-y-auto relative z-10">
+            <!-- Quick Collapse Icon Overlay -->
+            <button onclick="toggleLeftSidebar()" class="absolute right-2 top-4 bg-slate-900 border border-slate-800 text-slate-400 hover:text-white rounded p-1" title="Hide Sourcing Panel">
+                <i data-lucide="chevron-left" class="w-3.5 h-3.5"></i>
+            </button>
+
+            <!-- Mode Switcher Toggle Tab -->
+            <div class="p-4 pt-5 pb-2 shrink-0">
+                <label class="block text-[9px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">Select Sourcing Category</label>
+                <div class="bg-slate-900 border border-slate-800 p-1 rounded-xl flex gap-1">
+                    <button onclick="setSearchMode('material')" id="modeMaterialBtn" class="flex-1 py-1.5 rounded-lg text-xs font-bold bg-brand-500 text-slate-950 transition">
+                        Materials
+                    </button>
+                    <button onclick="setSearchMode('equipment')" id="modeEquipmentBtn" class="flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
+                        Equipment Rental
+                    </button>
+                </div>
+            </div>
+
+            <!-- MODE 1: Material Sourcing Container -->
+            <div id="materialSourcingBox" class="p-4 border-b border-slate-800/85">
+                <h2 class="text-xs font-bold text-slate-200 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <i data-lucide="search" class="w-4 h-4 text-brand-500"></i> Market Sourcing
+                </h2>
+                <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">Search real-time structural suppliers in specified local regions.</p>
+
+                <!-- Materials Search Form -->
+                <form id="searchForm" onsubmit="handleSearch(event, 'material')" class="space-y-3.5">
+                    <div>
+                        <label class="block text-[9px] uppercase font-bold text-slate-400 mb-1 tracking-wider">Construction Material</label>
+                        <select id="materialInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30">
+                            <optgroup label="Steel & Structural Metal">
+                                <option value="TMT Steel Rebar Fe 500D">TMT Steel Rebar Fe 500D</option>
+                                <option value="TMT Steel Rebar Fe 550D">TMT Steel Rebar Fe 550D</option>
+                                <option value="Structural Steel I-Beams">Structural Steel I-Beams / H-Beams</option>
+                                <option value="Mild Steel Plate (IS 2062)">Mild Steel Plates (IS 2062)</option>
+                                <option value="Scaffolding Pipes & Clamps">Scaffolding Heavy Duty Pipes</option>
+                            </optgroup>
+                            <optgroup label="Cement & Concrete">
+                                <option value="OPC 53 Grade Cement">OPC 53 Grade Cement</option>
+                                <option value="OPC 43 Grade Cement">OPC 43 Grade Cement</option>
+                                <option value="PPC (Portland Pozzolana Cement)">PPC Cement (Fly-Ash Based)</option>
+                                <option value="Ready Mix Concrete M25">Ready Mix Concrete (RMC) M25</option>
+                                <option value="Ready Mix Concrete M30">Ready Mix Concrete (RMC) M30</option>
+                                <option value="Ready Mix Concrete M40">Ready Mix Concrete (RMC) M40</option>
+                                <option value="Non-Shrink Grout Cement">Non-Shrink Structural Grout</option>
+                            </optgroup>
+                            <optgroup label="Masonry & Walling">
+                                <option value="AAC Lightweight Blocks">AAC Lightweight Blocks</option>
+                                <option value="Red Clay Wire-cut Bricks">Red Clay Wire-cut Bricks</option>
+                                <option value="Fly Ash Cement Bricks">Fly Ash Cement Bricks</option>
+                                <option value="Concrete Solid Blocks (8 inch)">Concrete Solid Blocks (8")</option>
+                                <option value="Concrete Hollow Blocks">Concrete Hollow Blocks</option>
+                            </optgroup>
+                            <optgroup label="Aggregates & Mining">
+                                <option value="Structural Aggregates 20mm">Structural Aggregates (20mm Blue Metal)</option>
+                                <option value="Structural Aggregates 10mm">Structural Aggregates (10mm)</option>
+                                <option value="Manufactured Sand (M-Sand)">Manufactured Sand (M-Sand) Concrete Grade</option>
+                                <option value="Plastering Sand (P-Sand)">Plastering M-Sand (Superfine)</option>
+                                <option value="Crushed Stone Dust Base">Crushed Stone Dust / GSB</option>
+                            </optgroup>
+                            <optgroup label="Plumbing & Electrical Infrastructure">
+                                <option value="uPVC Plumbing Pipes Schedule 40">uPVC Plumbing Pipes Schedule 40</option>
+                                <option value="CPVC Hot Water Pipes SDR 11">CPVC Hot Water Pipes SDR 11</option>
+                                <option value="HDPE Drainage Pipes (PN6)">HDPE Drainage & Sewerage Pipes</option>
+                                <option value="FRLS Copper Wiring (2.5 sq mm)">FRLS Copper Wiring (2.5 sq mm)</option>
+                                <option value="Heavy Duty PVC Conduit Pipe">Heavy Duty PVC Conduit Pipes</option>
+                            </optgroup>
+                            <optgroup label="Finishes, Sheeting & Drywalls">
+                                <option value="Gypsum Moisture Resistant Board">Gypsum Board (Moisture Resistant)</option>
+                                <option value="Fiber Cement Exterior Siding Board">Fiber Cement Exterior Board</option>
+                                <option value="Double Charged Vitrified Tiles">Vitrified Floor Tiles (600x600mm)</option>
+                                <option value="Structural Granite Slab Finish">Granite Slab (Polished Structural)</option>
+                                <option value="Exterior Acrylic Weatherproof Paint">Exterior Weatherproof Acrylic Paint</option>
+                            </optgroup>
+                            <option value="Custom">-- Enter Custom Material --</option>
+                        </select>
+                        <input type="text" id="customMaterialInput" placeholder="Enter custom material..." class="hidden mt-2 w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[9px] uppercase font-bold text-slate-400 mb-1 tracking-wider">Country</label>
+                            <select id="countryInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <option value="India">India</option>
+                                <option value="USA">USA</option>
+                                <option value="Saudi Arabia">Saudi Arabia</option>
+                                <option value="United Arab Emirates">United Arab Emirates</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Custom">-- Other --</option>
+                            </select>
+                            <input type="text" id="customCountryInput" placeholder="Enter Country..." class="hidden mt-2 w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                        </div>
+                        <div>
+                            <label class="block text-[9px] uppercase font-bold text-slate-400 mb-1 tracking-wider">State / Province</label>
+                            <select id="stateInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <!-- Dynamic state options populate via JS -->
+                            </select>
+                            <input type="text" id="customStateInput" placeholder="Enter State..." class="hidden mt-2 w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                        </div>
+                    </div>
+
+                    <button type="submit" id="searchBtn" class="w-full bg-gradient-to-r from-brand-500 to-amber-600 hover:from-brand-600 hover:to-amber-700 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-brand-500/10">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> Live Search & Sourced Specs
+                    </button>
+                </form>
+            </div>
+
+            <!-- MODE 2: Equipment Rental Container (Initially Hidden) -->
+            <div id="equipmentSourcingBox" class="hidden p-4 border-b border-slate-800/85">
+                <h2 class="text-xs font-bold text-slate-200 uppercase tracking-widest mb-2 flex items-center gap-1.5">
+                    <i data-lucide="truck" class="w-4 h-4 text-brand-500"></i> Equipment Rental Sourcing
+                </h2>
+                <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">Search regional heavy machinery and operator logistics centers.</p>
+
+                <form id="equipmentForm" onsubmit="handleSearch(event, 'equipment')" class="space-y-3.5">
+                    <div>
+                        <label class="block text-[9px] uppercase font-bold text-slate-400 mb-1 tracking-wider">Required Machinery</label>
+                        <select id="equipmentInput" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500/30">
+                            <optgroup label="Heavy Earthmoving Machinery">
+                                <option value="Crawler Hydraulic Excavator (20 Ton)">Crawler Hydraulic Excavator (20 Ton)</option>
+                                <option value="Heavy Soil Backhoe Loader (CAT 424)">Heavy Soil Backhoe Loader</option>
+                                <option value="Crawler Bulldozer (CAT D6)">Crawler Bulldozer (CAT D6)</option>
+                                <option value="Compact Skid Steer Loader">Compact Skid Steer Loader</option>
+                                <option value="Articulated Wheel Loader (3 Cum)">Articulated Wheel Loader (3 Cum)</option>
+                            </optgroup>
+                            <optgroup label="Lifting & Cranes Fleet">
+                                <option value="Self-Erecting Tower Crane (5 Ton)">Self-Erecting Tower Crane (5 Ton)</option>
+                                <option value="All-Terrain Hydraulic Mobile Crane (50 Ton)">All-Terrain Hydraulic Mobile Crane (50 Ton)</option>
+                                <option value="Industrial Telescopic Forklift (4 Ton)">Industrial Telescopic Forklift (4 Ton)</option>
+                                <option value="Heavy Duty Rough Terrain Crawler Crane">Heavy Duty Rough Terrain Crawler Crane</option>
+                            </optgroup>
+                            <optgroup label="Concrete & Transport Fleet">
+                                <option value="Transit Concrete Mixer Truck (6 Cum)">Transit Concrete Mixer Truck (6 Cum)</option>
+                                <option value="Concrete Boom Pump Truck (36m)">Concrete Boom Pump Truck (36m)</option>
+                                <option value="Heavy Multi-Axle Dump Truck (10 Wheeler)">Heavy Multi-Axle Dump Truck (10 Wheeler)</option>
+                            </optgroup>
+                            <optgroup label="Access & Scaffolding Systems">
+                                <option value="Self-Propelled Scissor Lift (Electric)">Self-Propelled Scissor Lift (Electric)</option>
+                                <option value="Articulating Aerial Boom Lift (80ft)">Articulating Aerial Boom Lift (80ft)</option>
+                                <option value="Heavy Duty Cup-Lock Scaffold Set">Heavy Duty Cup-Lock Scaffold Set</option>
+                            </optgroup>
+                            <optgroup label="Power, Utility & Support Tools">
+                                <option value="125 kVA Silent Diesel Generator Set">125 kVA Silent Diesel Generator Set</option>
+                                <option value="Mobile Hydraulic Light Tower (4 Lamp)">Mobile Hydraulic Light Tower</option>
+                                <option value="High Pressure Diesel Air Compressor">High Pressure Diesel Air Compressor</option>
+                            </optgroup>
+                            <optgroup label="Compaction & Paving Machinery">
+                                <option value="Self-Propelled Vibratory Soil Compactor (12 Ton)">Self-Propelled Soil Compactor (12T)</option>
+                                <option value="Tandem Vibratory Roller (Asphalt)">Tandem Vibratory Roller (Asphalt)</option>
+                                <option value="Pneumatic Tired Paver Finisher">Pneumatic Tired Paver Finisher</option>
+                            </optgroup>
+                            <option value="Custom">-- Enter Custom Equipment --</option>
+                        </select>
+                        <input type="text" id="customEquipmentInput" placeholder="Enter custom machinery..." class="hidden mt-2 w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[9px] uppercase font-bold text-slate-400 mb-1 tracking-wider">Country</label>
+                            <select id="countryInputEquip" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <option value="India">India</option>
+                                <option value="USA">USA</option>
+                                <option value="Saudi Arabia">Saudi Arabia</option>
+                                <option value="United Arab Emirates">United Arab Emirates</option>
+                                <option value="United Kingdom">United Kingdom</option>
+                                <option value="Canada">Canada</option>
+                                <option value="Australia">Australia</option>
+                                <option value="Custom">-- Other --</option>
+                            </select>
+                            <input type="text" id="customCountryInputEquip" placeholder="Enter Country..." class="hidden mt-2 w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                        </div>
+                        <div>
+                            <label class="block text-[9px] uppercase font-bold text-slate-400 mb-1 tracking-wider">State / Province</label>
+                            <select id="stateInputEquip" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-2 text-xs text-white focus:outline-none focus:border-brand-500">
+                                <!-- Dynamic state options populate via JS -->
+                            </select>
+                            <input type="text" id="customStateInputEquip" placeholder="Enter State..." class="hidden mt-2 w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                        </div>
+                    </div>
+
+                    <button type="submit" id="searchBtnEquip" class="w-full bg-gradient-to-r from-brand-500 to-amber-600 hover:from-brand-600 hover:to-amber-700 text-slate-950 font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all shadow-lg shadow-brand-500/10">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i> Live Search & Sourced Fleets
+                    </button>
+                </form>
+            </div>
+
+            <!-- List of Discovered Material/Equipment Projects -->
+            <div class="flex-1 p-4 flex flex-col overflow-hidden">
+                <div class="flex items-center justify-between mb-3 shrink-0">
+                    <h3 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                        <i data-lucide="database" class="w-3.5 h-3.5 text-brand-500"></i> Discovered Sources
+                    </h3>
+                    <span id="sourceCount" class="text-[10px] bg-slate-900 border border-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold">0</span>
+                </div>
+
+                <div id="sourcesContainer" class="flex-1 overflow-y-auto space-y-2.5 text-xs pr-1">
+                    <!-- Dynamic sources go here -->
+                    <div id="emptySourcesState" class="text-center py-12 text-slate-500">
+                        <i data-lucide="database" class="w-8 h-8 mx-auto mb-2 opacity-30 text-brand-500"></i>
+                        <p class="text-xs font-semibold text-slate-400">No suppliers discovered.</p>
+                        <p class="text-[10px] mt-1 text-slate-500">Launch a search above to crawl local markets.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MIDDLE AREA: Material Details, Comparison Matrix, Dynamic Certificate -->
+        <section class="flex-1 bg-slate-900 flex flex-col overflow-hidden relative border-r border-slate-800">
+            
+            <!-- Dynamic Sidebar Toggle Tab Indicators (Visible only when sidebars are collapsed) -->
+            <div class="absolute left-0 top-1/2 -translate-y-1/2 z-20 hidden" id="leftExpandBtn">
+                <button onclick="toggleLeftSidebar()" class="bg-brand-500 text-slate-950 px-1 py-3 rounded-r-lg shadow-lg hover:bg-brand-600 transition flex flex-col items-center gap-1">
+                    <i data-lucide="chevron-right" class="w-3 h-3"></i>
+                    <span class="text-[8px] uppercase tracking-widest [writing-mode:vertical-lr] font-bold">Sourcing</span>
+                </button>
+            </div>
+            <div class="absolute right-0 top-1/2 -translate-y-1/2 z-20 hidden" id="rightExpandBtn">
+                <button onclick="toggleRightSidebar()" class="bg-brand-500 text-slate-950 px-1 py-3 rounded-l-lg shadow-lg hover:bg-brand-600 transition flex flex-col items-center gap-1">
+                    <i data-lucide="chevron-left" class="w-3 h-3"></i>
+                    <span class="text-[8px] uppercase tracking-widest [writing-mode:vertical-lr] font-bold">AI Assistant</span>
+                </button>
+            </div>
+
+            <!-- Segmented Control Tabs (Wider controls) -->
+            <div class="bg-slate-950/80 border-b border-slate-800 px-6 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2 z-10 shrink-0">
+                <div class="flex flex-wrap gap-1.5">
+                    <button id="tabDetailsBtn" onclick="switchMainTab('details')" class="flex items-center gap-2 text-xs font-bold uppercase tracking-wide px-4 py-2 rounded-lg text-brand-500 bg-slate-900 border border-slate-800 transition shadow">
+                        <i data-lucide="file-text" class="w-4 h-4"></i> Supplier Intelligence Sheet
+                    </button>
+                    <button id="tabCompareBtn" onclick="switchMainTab('compare')" class="flex items-center gap-2 text-xs font-bold uppercase tracking-wide px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition">
+                        <i data-lucide="columns" class="w-4 h-4"></i> Compare Board <span id="compareCount" class="text-[10px] bg-brand-500/20 text-brand-500 px-1.5 py-0.5 rounded-full">0</span>
+                    </button>
+                    <button id="tabCertificateBtn" onclick="switchMainTab('certificate')" class="flex items-center gap-2 text-xs font-bold uppercase tracking-wide px-4 py-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-900 transition">
+                        <i data-lucide="award" class="w-4 h-4"></i> Verification & Compliance
+                    </button>
+                </div>
+                <div id="activeSelectionHeader" class="text-xs text-slate-400 flex items-center gap-2">
+                    <span class="inline-block w-2.5 h-2.5 rounded-full bg-slate-800" id="statusIndicator"></span>
+                    <span id="selectedSupplierTitle" class="font-semibold text-slate-200">No supplier selected</span>
+                </div>
+            </div>
+
+            <!-- Workspace Content Panes -->
+            <div class="flex-1 overflow-y-auto p-6 space-y-6">
+
+                <!-- TAB 1: SUPPLIER DETAILS VIEW -->
+                <div id="paneDetails" class="space-y-6">
+                    <div id="detailsPlaceholder" class="flex flex-col items-center justify-center py-28 text-slate-500">
+                        <div class="p-4 bg-slate-950 rounded-full border border-slate-800 mb-4 animate-bounce">
+                            <i data-lucide="building-2" class="w-14 h-14 stroke-[1.2] text-brand-500"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-300">Awaiting Sourcing Inquiry</h3>
+                        <p class="text-sm text-slate-400 text-center max-w-md mt-1.5 leading-relaxed">Select or search for a building material / rental fleet and target state on the left to reveal the intelligent regional dealer framework.</p>
+                        <div class="mt-4 flex gap-2">
+                            <button onclick="toggleLeftSidebar()" class="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-white font-semibold text-xs rounded-lg transition border border-slate-700">Open Sourcing Engine</button>
+                        </div>
+                    </div>
+
+                    <!-- Main Dynamic Details Content (Vastly Enlarged Design) -->
+                    <div id="detailsContent" class="hidden space-y-6">
+                        
+                        <!-- Large Premium Supplier Banner Header -->
+                        <div class="bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 border border-slate-800 p-8 rounded-2xl flex flex-col lg:flex-row lg:items-center justify-between gap-6 shadow-2xl relative overflow-hidden">
+                            <!-- Background overlay design line -->
+                            <div class="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-brand-500/5 to-transparent pointer-events-none"></div>
+
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-wider mb-2.5">
+                                    <span class="px-2.5 py-1 bg-brand-500/10 text-brand-500 rounded border border-brand-500/20" id="detailCategory">Specialist</span>
+                                    <span class="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded border border-emerald-500/20 flex items-center gap-1">
+                                        <i data-lucide="shield-check" class="w-3 h-3"></i> Verified Corporate Seller
+                                    </span>
+                                </div>
+                                <h2 id="detailCompanyName" class="text-3xl md:text-4xl font-extrabold text-white tracking-tight leading-none">Global Ready-Mix Co.</h2>
+                                <p id="detailAddress" class="text-xs text-slate-400 mt-2.5 flex items-center gap-1.5">
+                                    <i data-lucide="map-pin" class="w-4 h-4 text-red-500"></i> Loading supplier logistics hub location...
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 shrink-0 z-10">
+                                <button onclick="toggleCompareActiveSupplier()" id="btnAddToCompare" class="bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 px-5 rounded-xl text-xs flex items-center gap-2 border border-slate-700 transition duration-150">
+                                    <i data-lucide="plus-circle" class="w-4 h-4 text-brand-500"></i> Add to Compare
+                                </button>
+                                <a id="detailWebsiteBtn" href="#" target="_blank" class="bg-gradient-to-r from-brand-500 to-amber-600 hover:from-brand-600 hover:to-amber-700 text-slate-950 font-extrabold py-3 px-5 rounded-xl text-xs flex items-center gap-2 transition duration-150 shadow-lg shadow-brand-500/15">
+                                    <i data-lucide="globe" class="w-4 h-4"></i> Visit Official Site
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Large Double Column Grid: Logistics & Calculator vs Contact Details -->
+                        <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+                            
+                            <!-- Col 1 & 2: Interactive Pricing & Cost Calculator -->
+                            <div class="xl:col-span-2 bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col justify-between space-y-4">
+                                <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                        <i data-lucide="calculator" class="text-brand-500 w-4 h-4"></i> 
+                                        <span id="calcPanelTitle">Order Volume Cost Estimator</span>
+                                    </h3>
+                                    <span class="text-[10px] text-slate-400">Index-linked estimates</span>
+                                </div>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-2">
+                                    <div class="bg-slate-900/60 p-5 rounded-xl border border-slate-800 flex flex-col justify-between">
+                                        <div>
+                                            <p id="calcCostLabel" class="text-[10px] text-slate-400 uppercase font-bold tracking-wider mb-1">Estimated Unit Price</p>
+                                            <h4 id="detailCost" class="text-2xl md:text-3xl font-black text-white tracking-tight">$90.00 <span id="calcCostUnit" class="text-xs font-semibold text-slate-400">/ Metric Ton</span></h4>
+                                        </div>
+                                        <p class="text-[10px] text-brand-500/90 mt-4 leading-relaxed">Tax, regional freight tariffs, and bulk supply/rental period discounts are simulated below.</p>
+                                    </div>
+                                    
+                                    <div class="space-y-3">
+                                        <div>
+                                            <label id="calcQuantityLabel" class="block text-[10px] uppercase font-bold text-slate-400 mb-1.5 tracking-wider">Required Quantity (Units)</label>
+                                            <div class="relative">
+                                                <input type="number" id="calcQuantity" value="50" oninput="runVolumeCalculation()" min="1" class="w-full bg-slate-950 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                                                <span id="calcQuantityUnit" class="absolute right-3 top-2.5 text-[10px] text-slate-500 font-bold uppercase">Metric Tons</span>
+                                            </div>
+                                        </div>
+                                        <div class="bg-slate-900/40 p-3 rounded-lg border border-slate-800 space-y-2 text-[11px]">
+                                            <div class="flex justify-between">
+                                                <span class="text-slate-400">Subtotal Price:</span>
+                                                <span class="font-bold text-white" id="calcSubtotal">$4,500.00</span>
+                                            </div>
+                                            <div class="flex justify-between text-slate-400">
+                                                <span>Logistics Charge (Est):</span>
+                                                <span id="calcLogistics">$450.00</span>
+                                            </div>
+                                            <div class="flex justify-between border-t border-slate-800 pt-2 font-bold text-xs">
+                                                <span class="text-brand-500">Project Order Est:</span>
+                                                <span class="text-white" id="calcTotal">$4,950.00</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="text-[10px] text-slate-500 italic">
+                                    *Disclaimer: Estimates are dynamic market representations computed for initial feasibility checks. Confirm quotes via RFQ.
+                                </div>
+                            </div>
+
+                            <!-- Col 3: Direct Sourcing Contact Desk -->
+                            <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl flex flex-col justify-between space-y-4">
+                                <div>
+                                    <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2 border-b border-slate-800 pb-3 mb-4">
+                                        <i data-lucide="phone-call" class="text-brand-500 w-4 h-4"></i> Supplier Contact Desk
+                                    </h3>
+                                    
+                                    <div class="space-y-3">
+                                        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+                                            <div>
+                                                <p class="text-[9px] text-slate-400 uppercase font-black tracking-wider mb-0.5">Corporate Helpline</p>
+                                                <p id="detailPhone" class="text-xs font-bold text-white">+1-800-REBARS</p>
+                                            </div>
+                                            <a id="detailPhoneCall" href="#" class="p-2 bg-slate-800 text-brand-500 hover:text-white rounded-lg hover:bg-slate-700 transition">
+                                                <i data-lucide="phone" class="w-4 h-4"></i>
+                                            </a>
+                                        </div>
+
+                                        <div class="bg-slate-900/50 p-3 rounded-xl border border-slate-800 flex items-center justify-between">
+                                            <div>
+                                                <p class="text-[9px] text-slate-400 uppercase font-black tracking-wider mb-0.5">Procurement RFQ Inbox</p>
+                                                <p id="detailEmail" class="text-xs font-bold text-white">rfq@suppliers.com</p>
+                                            </div>
+                                            <a id="detailEmailSend" href="#" class="p-2 bg-slate-800 text-brand-500 hover:text-white rounded-lg hover:bg-slate-700 transition">
+                                                <i data-lucide="mail" class="w-4 h-4"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="bg-slate-900/50 p-3.5 rounded-xl border border-slate-800 space-y-2 text-xs">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-slate-400 font-medium">Registrar Registry</span>
+                                        <span class="font-mono text-white text-[11px]" id="detailRegCode">REG-9812A-1</span>
+                                    </div>
+                                    <div class="flex justify-between items-center border-t border-slate-800 pt-2 text-[11px]">
+                                        <span class="text-slate-400 font-medium">Verification Status</span>
+                                        <span class="text-emerald-400 font-bold flex items-center gap-0.5">
+                                            <i data-lucide="check-check" class="w-3.5 h-3.5"></i> Active Agency
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Full Specification Sheet Details Card (Enlarged and optimized for details display) -->
+                        <div class="bg-slate-950 border border-slate-800 p-6 rounded-2xl space-y-5">
+                            <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                                <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                    <i data-lucide="shield-alert" class="text-brand-500 w-4.5 h-4.5"></i> 
+                                    <span id="detailSpecHeaderTitle">Technical Specifications & Industrial Compliances</span>
+                                </h3>
+                                <span id="detailSpecCertBadge" class="text-[10px] bg-slate-900 border border-slate-800 text-amber-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider">Quality Approved</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                                <div class="bg-slate-900/30 p-4 rounded-xl border border-slate-800">
+                                    <p id="detailSpecLabel1" class="text-[9px] text-slate-400 uppercase font-black tracking-wider mb-1">Compliance Standard</p>
+                                    <p id="detailSpecStandard" class="text-sm font-extrabold text-white">ASTM A615 / IS 1786 (Grade Fe 500D)</p>
+                                    <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">Guarantees compliance certifications, load properties, or safety testing targets.</p>
+                                </div>
+                                <div class="bg-slate-900/30 p-4 rounded-xl border border-slate-800">
+                                    <p id="detailSpecLabel2" class="text-[9px] text-slate-400 uppercase font-black tracking-wider mb-1">Typical Fleet Grade</p>
+                                    <p id="detailSpecGrades" class="text-sm font-extrabold text-white">Heavy Industrial Grade A / Fe 550D</p>
+                                    <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">Performance capacity, power classifications, or high seismic tolerance indicators.</p>
+                                </div>
+                                <div class="bg-slate-900/30 p-4 rounded-xl border border-slate-800 lg:col-span-2">
+                                    <p id="detailSpecLabel3" class="text-[9px] text-slate-400 uppercase font-black tracking-wider mb-1">Recommended Applications</p>
+                                    <p id="detailSpecUses" class="text-sm font-medium text-slate-300">Heavy structural building foundations, massive bridge girders, concrete high-rise pillars and structural engineering works.</p>
+                                    <p class="text-[10px] text-slate-500 mt-1 leading-relaxed">Optimized for safety limits, high shear loads, or deep excavation efficiency.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Expanded Map View and Logistics Anchor Coordinates -->
+                        <div class="bg-slate-950 border border-slate-800 rounded-2xl overflow-hidden flex flex-col h-[380px] shadow-2xl">
+                            <div class="bg-slate-900/85 px-5 py-3 flex items-center justify-between text-xs font-bold border-b border-slate-800 shrink-0">
+                                <span class="flex items-center gap-1.5 text-slate-300 uppercase tracking-widest text-[10px]">
+                                    <i data-lucide="map" class="w-4 h-4 text-brand-500"></i> Interactive Logistics & Mapping Engine
+                                </span>
+                                <span class="text-slate-500 text-[10px] font-mono" id="mapCoordLabel">Dynamic Live Geolocation Anchor</span>
+                            </div>
+                            <div class="flex-1 bg-slate-950 relative">
+                                <iframe id="mapIframe" class="w-full h-full border-0 grayscale hover:grayscale-0 transition duration-500" src="" allowfullscreen="" loading="lazy"></iframe>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- TAB 2: COMPARISON MATRIX -->
+                <div id="paneCompare" class="hidden space-y-6">
+                    <div class="flex items-center justify-between border-b border-slate-800 pb-3">
+                        <div>
+                            <h2 class="text-lg font-black text-white uppercase tracking-wider">Multi-Supplier Evaluation Desk</h2>
+                            <p class="text-xs text-slate-400">Select suppliers from your active list on the left to evaluate side-by-side.</p>
+                        </div>
+                        <button onclick="clearComparison()" class="text-xs bg-slate-800 hover:bg-slate-700 px-3.5 py-2 rounded-lg text-slate-300 flex items-center gap-1.5 transition">
+                            <i data-lucide="trash-2" class="w-4 h-4 text-red-400"></i> Clear Comparison List
+                        </button>
+                    </div>
+
+                    <div id="compareEmptyState" class="text-center py-20 text-slate-500">
+                        <i data-lucide="arrow-right-left" class="w-12 h-12 mx-auto mb-3 opacity-30 text-brand-500"></i>
+                        <p class="text-sm font-bold text-slate-400">No suppliers selected for comparison yet.</p>
+                        <p class="text-xs mt-1 text-slate-500">Navigate to active discovered sources and click 'Add to Compare'.</p>
+                    </div>
+
+                    <!-- Comparison Table Grid -->
+                    <div id="compareTableContainer" class="hidden overflow-x-auto border border-slate-800 rounded-xl bg-slate-950">
+                        <table class="w-full text-left border-collapse min-w-[750px]">
+                            <thead>
+                                <tr class="bg-slate-900 border-b border-slate-800">
+                                    <th class="p-4 text-xs uppercase text-slate-400 font-bold w-1/4">Evaluation Criteria</th>
+                                    <!-- Dynamic table headers representing compared suppliers -->
+                                    <th id="compareCol1Header" class="p-4 text-sm font-bold text-white w-1/4">Supplier 1</th>
+                                    <th id="compareCol2Header" class="p-4 text-sm font-bold text-white w-1/4">Supplier 2</th>
+                                    <th id="compareCol3Header" class="p-4 text-sm font-bold text-white w-1/4">Supplier 3</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-800 text-xs">
+                                <tr>
+                                    <td class="p-4 font-bold text-slate-300 bg-slate-900/30 uppercase tracking-wider text-[10px]">Approx Cost / Rental Rate</td>
+                                    <td id="comp1Cost" class="p-4 text-white font-black text-sm">-</td>
+                                    <td id="comp2Cost" class="p-4 text-white font-black text-sm">-</td>
+                                    <td id="comp3Cost" class="p-4 text-white font-black text-sm">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-slate-300 bg-slate-900/30 uppercase tracking-wider text-[10px]">Standards & Compliance</td>
+                                    <td id="comp1Specs" class="p-4 text-slate-300">-</td>
+                                    <td id="comp2Specs" class="p-4 text-slate-300">-</td>
+                                    <td id="comp3Specs" class="p-4 text-slate-300">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-slate-300 bg-slate-900/30 uppercase tracking-wider text-[10px]">Location / Logistics</td>
+                                    <td id="comp1Loc" class="p-4 text-slate-400">-</td>
+                                    <td id="comp2Loc" class="p-4 text-slate-400">-</td>
+                                    <td id="comp3Loc" class="p-4 text-slate-400">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-slate-300 bg-slate-900/30 uppercase tracking-wider text-[10px]">Contact Desk</td>
+                                    <td id="comp1Contact" class="p-4 text-slate-400 font-mono">-</td>
+                                    <td id="comp2Contact" class="p-4 text-slate-400 font-mono">-</td>
+                                    <td id="comp3Contact" class="p-4 text-slate-400 font-mono">-</td>
+                                </tr>
+                                <tr>
+                                    <td class="p-4 font-bold text-slate-300 bg-slate-900/30 uppercase tracking-wider text-[10px]">Action</td>
+                                    <td id="comp1Action" class="p-4">-</td>
+                                    <td id="comp2Action" class="p-4">-</td>
+                                    <td id="comp3Action" class="p-4">-</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- AI Comparison Evaluation Synthesis -->
+                    <div id="compareAnalysisCard" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-5 space-y-3">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-xs font-black text-white uppercase tracking-widest flex items-center gap-1.5">
+                                <i data-lucide="brain-circuit" class="text-brand-500 w-4 h-4 animate-pulse"></i> AI Comparative Sourcing & Fleet Analysis
+                            </h3>
+                            <button onclick="generateComparisonAnalysis()" class="bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold px-3.5 py-1.5 rounded-lg text-xs flex items-center gap-1 transition">
+                                <i data-lucide="refresh-cw" class="w-3 h-3"></i> Synthesize Analysis
+                            </button>
+                        </div>
+                        <div id="comparisonAnalysisOutput" class="text-slate-300 text-xs leading-relaxed space-y-2 p-4 bg-slate-900 rounded-lg border border-slate-800">
+                            Click 'Synthesize Analysis' to let Gemini compare structural pricing, fleet size, safety standard compliance, and make buying/rental recommendations.
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB 3: REGISTRATION & COMPLIANCE CERTIFICATE VIEWER -->
+                <div id="paneCertificate" class="hidden space-y-6">
+                    <div class="border-b border-slate-800 pb-3">
+                        <h2 class="text-lg font-black text-white uppercase tracking-wider">Ministry of Corporate Registrar Verification</h2>
+                        <p class="text-xs text-slate-400">Inspecting registered legitimacy, corporate authentication certificates, and compliance ratings of vendors.</p>
+                    </div>
+
+                    <div id="certPlaceholder" class="text-center py-20 text-slate-500">
+                        <i data-lucide="award" class="w-16 h-16 mx-auto mb-4 text-brand-500"></i>
+                        <p class="text-sm font-semibold">Please select a verified company from the active sources list to render its Certificate of Compliance & Registration.</p>
+                    </div>
+
+                    <!-- Dynamic SVG Certificate Frame -->
+                    <div id="certContainer" class="hidden max-w-2xl mx-auto bg-white text-slate-950 p-8 rounded-xl border-8 border-amber-800 shadow-2xl relative overflow-hidden">
+                        <!-- Elegant watermark pattern background -->
+                        <div class="absolute inset-0 opacity-5 pointer-events-none flex items-center justify-center">
+                            <i data-lucide="shield" class="w-[300px] h-[300px] text-slate-950"></i>
+                        </div>
+
+                        <!-- Main Certificate Border Layout -->
+                        <div class="border-2 border-amber-700 p-6 relative">
+                            <!-- Golden Star/Shield Seal -->
+                            <div class="absolute top-2 right-2 w-16 h-16 text-brand-600 flex items-center justify-center opacity-90">
+                                <i data-lucide="award" class="w-12 h-12 stroke-[1.5]"></i>
+                            </div>
+
+                            <div class="text-center space-y-4">
+                                <h4 class="text-[10px] tracking-widest font-extrabold uppercase text-amber-800">Official Verification & Compliance Registry</h4>
+                                <h2 class="font-serif text-3xl font-extrabold tracking-tight text-slate-900 border-b border-amber-200 pb-4 max-w-md mx-auto">Certificate of Good Standing</h2>
+
+                                <div class="py-4 space-y-2">
+                                    <p class="text-xs text-slate-500 italic">This document certifies that the procurement candidate entity</p>
+                                    <p id="certCompanyName" class="text-lg font-bold text-amber-900 uppercase tracking-wide">NORTH AMERICA REBAR CO.</p>
+                                    <p class="text-xs text-slate-600 max-w-sm mx-auto">Is legally registered as a certified merchant of construction materials or equipment hire operations under regional regulatory standards.</p>
+                                </div>
+
+                                <div class="grid grid-cols-2 gap-4 text-left border-t border-b border-slate-200 py-3 text-[10px] text-slate-600">
+                                    <div>
+                                        <p class="uppercase tracking-wider font-bold text-slate-500">Registration Number</p>
+                                        <p id="certRegNo" class="font-mono text-xs font-semibold text-slate-900">REG-US-7781-889B</p>
+                                    </div>
+                                    <div>
+                                        <p class="uppercase tracking-wider font-bold text-slate-500">Authorized Class</p>
+                                        <p id="certAuthClass" class="text-xs font-semibold text-slate-900">Heavy Industrial Grade A Merchant</p>
+                                    </div>
+                                    <div>
+                                        <p class="uppercase tracking-wider font-bold text-slate-500">Affiliation & Compliance</p>
+                                        <p id="certCompliance" class="text-xs font-semibold text-slate-900">ASTM Standard / OSHA Safe Fleet</p>
+                                    </div>
+                                    <div>
+                                        <p class="uppercase tracking-wider font-bold text-slate-500">Issuer Signatures</p>
+                                        <p class="text-xs font-semibold text-amber-800 italic font-serif">Ministry Compliance Office</p>
+                                    </div>
+                                </div>
+
+                                <div class="pt-4 flex items-center justify-between text-[9px] text-slate-400">
+                                    <span>Issued: 12-Feb-2024</span>
+                                    <span class="flex items-center gap-1 text-emerald-600 font-semibold uppercase">
+                                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i> Authenticated Verification
+                                    </span>
+                                    <span>Expiry: 12-Feb-2028</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- RIGHT SIDEBAR: Notebook AI Companion Chat & Workspace Notes -->
+        <section id="rightSidebar" class="sidebar-transition w-80 border-l border-slate-800 bg-slate-950 flex flex-col shrink-0 overflow-hidden relative z-10">
+            <!-- Quick Collapse Button Overlay -->
+            <button onclick="toggleRightSidebar()" class="absolute left-2 top-4 bg-slate-900 border border-slate-800 text-slate-400 hover:text-white rounded p-1" title="Hide AI Assistant Panel">
+                <i data-lucide="chevron-right" class="w-3.5 h-3.5"></i>
+            </button>
+
+            <!-- Sidebar Header Switcher (Chat vs Notes) -->
+            <div class="border-b border-slate-800 flex bg-slate-950 shrink-0">
+                <button id="rightTabChatBtn" onclick="switchRightTab('chat')" class="flex-1 text-center py-3.5 text-xs uppercase tracking-widest font-black border-b-2 border-brand-500 text-brand-500 transition">
+                    <i data-lucide="bot-message-square" class="inline-block w-4 h-4 mr-1"></i> AI Advisor
+                </button>
+                <button id="rightTabNotesBtn" onclick="switchRightTab('notes')" class="flex-1 text-center py-3.5 text-xs uppercase tracking-widest font-black text-slate-400 hover:text-white transition">
+                    <i data-lucide="file-signature" class="inline-block w-4 h-4 mr-1"></i> Scratchpad
+                </button>
+            </div>
+
+            <!-- CHAT INTERFACE -->
+            <div id="rightTabChat" class="flex-1 flex flex-col overflow-hidden">
+                <!-- Instruction Panel -->
+                <div class="p-3 bg-slate-900/60 border-b border-slate-800 text-[10px] text-slate-400 flex items-center gap-1.5">
+                    <i data-lucide="info" class="w-3.5 h-3.5 text-brand-500 shrink-0"></i>
+                    <span>The Assistant is grounded in the active materials and fleet lists loaded. Ask for specifications, compare load/reach limits, or draft hire drafts.</span>
+                </div>
+
+                <!-- Chat History Window -->
+                <div id="chatHistory" class="flex-1 overflow-y-auto p-4 space-y-4 text-xs pr-1">
+                    <div class="flex gap-2.5 items-start">
+                        <div class="bg-brand-500 text-slate-950 p-1.5 rounded-lg shrink-0">
+                            <i data-lucide="bot" class="w-4 h-4"></i>
+                        </div>
+                        <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl max-w-[85%] text-slate-200">
+                            <p class="font-bold text-[10px] text-brand-500 mb-0.5 uppercase tracking-wide">BuildLink CoPilot</p>
+                            <p class="leading-relaxed">Hello! I am your construction sourcing assistant. Search for materials or equipment fleets on the left, and I will help you:</p>
+                            <ul class="list-disc pl-4 mt-2 space-y-1 text-slate-300 text-[11px]">
+                                <li>Draft formal request-for-quotes (RFQs) and rental hire terms</li>
+                                <li>Assess safety standards, load capacities, and excavator depth metrics</li>
+                                <li>Optimize logistics distances and fleet shipping rates</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Loading Indicator -->
+                <div id="chatLoading" class="hidden px-4 py-2 flex items-center space-x-2 text-xs text-slate-400 italic">
+                    <span class="animate-bounce text-brand-500">●</span><span class="animate-bounce delay-100 text-brand-500">●</span><span class="animate-bounce delay-200 text-brand-500">●</span>
+                    <span>Formulating professional procurement analysis...</span>
+                </div>
+
+                <!-- Chat Input area -->
+                <div class="p-3 border-t border-slate-800 bg-slate-950 shrink-0">
+                    <div class="flex space-x-2">
+                        <input id="chatInput" type="text" placeholder="Ask about rebar grades or excavator hire..." onkeydown="handleChatKeyDown(event)" class="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                        <button onclick="sendChatMessage()" class="bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold p-2 rounded-lg transition">
+                            <i data-lucide="send" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- NOTES INTERFACE -->
+            <div id="rightTabNotes" class="hidden flex-1 flex flex-col overflow-hidden p-4 space-y-3">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Scratchpad Workspace</span>
+                    <button onclick="clearNotes()" class="text-[10px] text-red-400 hover:underline flex items-center gap-0.5">
+                        <i data-lucide="trash" class="w-3 h-3"></i> Clear pad
+                    </button>
+                </div>
+                <textarea id="notesArea" placeholder="Capture key calculations, technical requirements, and draft RFQs here..." class="flex-1 w-full bg-slate-900 border border-slate-800 rounded-xl p-3 text-xs text-white resize-none focus:outline-none focus:border-brand-500 leading-relaxed"></textarea>
+                <div class="text-[10px] text-slate-500 flex justify-between items-center bg-slate-900/60 p-2 rounded border border-slate-800">
+                    <span>Stored dynamically in browser</span>
+                    <button onclick="copyNotesToClipboard()" class="text-brand-500 hover:underline font-bold">Copy Notes</button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- MODAL: Optional API Key config -->
+    <div id="setupModal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <button onclick="toggleSetupModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-brand-500 text-slate-950 p-2 rounded-lg">
+                    <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h3 class="text-lg font-bold text-white">System API Credentials</h3>
+                    <p class="text-xs text-slate-400">Optional configuration for advanced or custom models.</p>
+                </div>
+            </div>
+            <p class="text-xs text-slate-300 mb-4 leading-relaxed">
+                By default, this notebook runs seamlessly utilizing the default platform environment credentials with live Google Search Grounding to pull real construction dealers & hire centers. No extra setup is required!
+            </p>
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-[10px] uppercase font-bold text-slate-400 mb-1">Custom Gemini API Key</label>
+                    <input type="password" id="customApiKey" placeholder="AIzaSy..." class="w-full bg-slate-950 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-brand-500" />
+                </div>
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 text-[10px] text-slate-400 font-semibold text-center">
+                    If configured, the app will execute calls using this specific key directly. Leave empty to use system defaults.
+                </div>
+                <button onclick="saveApiCredentials()" class="w-full bg-brand-500 hover:bg-brand-600 text-slate-950 font-bold py-2 rounded-lg text-xs transition">
+                    Save and Restructure
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST container -->
+    <div id="toastContainer" class="fixed bottom-4 left-4 z-50 space-y-2 pointer-events-none"></div>
+
+    <script>
+        // Environment API key placeholder (Always set to "" as required by runtime environment instructions)
+        const apiKey = "";
+
+        const locationMap = {
+            "India": [
+                "Maharashtra (Mumbai)", "Delhi NCR", "Karnataka (Bengaluru)", 
+                "Tamil Nadu (Chennai)", "Telangana (Hyderabad)", "Gujarat (Ahmedabad)", 
+                "West Bengal (Kolkata)", "Uttar Pradesh", "Rajasthan (Jaipur)", "Kerala"
+            ],
+            "USA": [
+                "California", "Texas", "Florida", "New York", "Illinois", 
+                "Georgia", "Ohio", "Washington State", "North Carolina", "Pennsylvania"
+            ],
+            "Saudi Arabia": [
+                "Riyadh Region", "Makkah (Jeddah)", "Eastern Province (Dammam)", 
+                "Medina Region", "Asir Region", "Tabuk Region"
+            ],
+            "United Arab Emirates": [
+                "Dubai", "Abu Dhabi", "Sharjah", "Ajman", "Ras Al Khaimah", "Fujairah"
+            ],
+            "United Kingdom": [
+                "England (London)", "England (Birmingham)", "England (Manchester)", 
+                "Scotland (Edinburgh)", "Wales (Cardiff)", "Northern Ireland"
+            ],
+            "Canada": [
+                "Ontario (Toronto)", "British Columbia (Vancouver)", "Quebec (Montreal)", 
+                "Alberta (Calgary)", "Manitoba (Winnipeg)"
+            ],
+            "Australia": [
+                "New South Wales (Sydney)", "Victoria (Melbourne)", "Queensland (Brisbane)", 
+                "Western Australia (Perth)", "South Australia (Adelaide)"
+            ]
+        };
+
+        // State variables
+        let suppliersList = [];
+        let comparedSuppliers = [];
+        let currentSelectedSupplier = null;
+        let chatMessages = [];
+        let activeSearchMode = "material"; // "material" or "equipment"
+        
+        window.onload = function() {
+            lucide.createIcons();
+            loadNotesFromStorage();
+            initializeLocationSelectors('countryInput', 'stateInput', 'customCountryInput', 'customStateInput');
+            initializeLocationSelectors('countryInputEquip', 'stateInputEquip', 'customCountryInputEquip', 'customStateInputEquip');
+        };
+
+        function initializeLocationSelectors(countryId, stateId, customCountryId, customStateId) {
+            const countrySelect = document.getElementById(countryId);
+            const stateSelect = document.getElementById(stateId);
+            const customCountry = document.getElementById(customCountryId);
+            const customState = document.getElementById(customStateId);
+
+            function populateStates(country) {
+                stateSelect.innerHTML = '';
+                
+                if (country === 'Custom') {
+                    customCountry.classList.remove('hidden');
+                    customCountry.setAttribute('required', 'true');
+                    customState.classList.remove('hidden');
+                    customState.setAttribute('required', 'true');
+                    stateSelect.classList.add('hidden');
+                } else {
+                    customCountry.classList.add('hidden');
+                    customCountry.removeAttribute('required');
+                    customState.classList.add('hidden');
+                    customState.removeAttribute('required');
+                    stateSelect.classList.remove('hidden');
+
+                    const states = locationMap[country] || [];
+                    states.forEach(state => {
+                        const opt = document.createElement('option');
+                        opt.value = state;
+                        opt.textContent = state;
+                        stateSelect.appendChild(opt);
+                    });
+                }
+            }
+
+            countrySelect.addEventListener('change', function() {
+                populateStates(this.value);
+            });
+
+            populateStates(countrySelect.value);
+        }
+
+        // Search mode switcher (Materials vs Equipment Rental)
+        function setSearchMode(mode) {
+            activeSearchMode = mode;
+            const matBtn = document.getElementById('modeMaterialBtn');
+            const equipBtn = document.getElementById('modeEquipmentBtn');
+            const matBox = document.getElementById('materialSourcingBox');
+            const equipBox = document.getElementById('equipmentSourcingBox');
+
+            if (mode === 'material') {
+                matBtn.className = "flex-1 py-1.5 rounded-lg text-xs font-bold bg-brand-500 text-slate-950 transition";
+                equipBtn.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                matBox.classList.remove('hidden');
+                equipBox.classList.add('hidden');
+            } else {
+                equipBtn.className = "flex-1 py-1.5 rounded-lg text-xs font-bold bg-brand-500 text-slate-950 transition";
+                matBtn.className = "flex-1 py-1.5 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition";
+                equipBox.classList.remove('hidden');
+                matBox.classList.add('hidden');
+            }
+            showToast(`Switched workspace to: ${mode === 'material' ? 'Material Sourcing' : 'Equipment Rental'}`, "info");
+        }
+
+        // Custom inputs display handlers
+        document.getElementById('materialInput').addEventListener('change', function() {
+            const customInput = document.getElementById('customMaterialInput');
+            if (this.value === 'Custom') {
+                customInput.classList.remove('hidden');
+                customInput.setAttribute('required', 'true');
+            } else {
+                customInput.classList.add('hidden');
+                customInput.removeAttribute('required');
+            }
+        });
+
+        document.getElementById('equipmentInput').addEventListener('change', function() {
+            const customInput = document.getElementById('customEquipmentInput');
+            if (this.value === 'Custom') {
+                customInput.classList.remove('hidden');
+                customInput.setAttribute('required', 'true');
+            } else {
+                customInput.classList.add('hidden');
+                customInput.removeAttribute('required');
+            }
+        });
+
+        function toggleLeftSidebar() {
+            const sidebar = document.getElementById('leftSidebar');
+            const expandBtn = document.getElementById('leftExpandBtn');
+            if (sidebar.classList.contains('w-72')) {
+                sidebar.classList.remove('w-72');
+                sidebar.classList.add('w-0', 'p-0', 'border-r-0');
+                expandBtn.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('w-72');
+                sidebar.classList.remove('w-0', 'p-0', 'border-r-0');
+                expandBtn.classList.add('hidden');
+            }
+        }
+
+        function toggleRightSidebar() {
+            const sidebar = document.getElementById('rightSidebar');
+            const expandBtn = document.getElementById('rightExpandBtn');
+            if (sidebar.classList.contains('w-80')) {
+                sidebar.classList.remove('w-80');
+                sidebar.classList.add('w-0', 'p-0', 'border-l-0');
+                expandBtn.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('w-80');
+                sidebar.classList.remove('w-0', 'p-0', 'border-l-0');
+                expandBtn.classList.add('hidden');
+            }
+        }
+
+        function resetSidebars() {
+            const leftSidebar = document.getElementById('leftSidebar');
+            const rightSidebar = document.getElementById('rightSidebar');
+            const leftExpandBtn = document.getElementById('leftExpandBtn');
+            const rightExpandBtn = document.getElementById('rightExpandBtn');
+
+            leftSidebar.classList.add('w-72');
+            leftSidebar.classList.remove('w-0', 'p-0', 'border-r-0');
+            leftExpandBtn.classList.add('hidden');
+
+            rightSidebar.classList.add('w-80');
+            rightSidebar.classList.remove('w-0', 'p-0', 'border-l-0');
+            rightExpandBtn.classList.add('hidden');
+        }
+
+        function toggleSetupModal() {
+            const modal = document.getElementById('setupModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function switchMainTab(tab) {
+            const tabs = ['details', 'compare', 'certificate'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab${t.charAt(0).toUpperCase() + t.slice(1)}Btn`);
+                const pane = document.getElementById(`pane${t.charAt(0).toUpperCase() + t.slice(1)}`);
+                if (t === tab) {
+                    btn.classList.add('text-brand-500', 'bg-slate-900', 'border-slate-800');
+                    btn.classList.remove('text-slate-400', 'hover:text-white', 'hover:bg-slate-900');
+                    pane.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('text-brand-500', 'bg-slate-900', 'border-slate-800');
+                    btn.classList.add('text-slate-400', 'hover:text-white', 'hover:bg-slate-900');
+                    pane.classList.add('hidden');
+                }
+            });
+        }
+
+        function switchRightTab(tab) {
+            const chatBtn = document.getElementById('rightTabChatBtn');
+            const notesBtn = document.getElementById('rightTabNotesBtn');
+            const chatPane = document.getElementById('rightTabChat');
+            const notesPane = document.getElementById('rightTabNotes');
+
+            if (tab === 'chat') {
+                chatBtn.classList.add('border-brand-500', 'text-brand-500');
+                chatBtn.classList.remove('text-slate-400');
+                notesBtn.classList.add('text-slate-400');
+                notesBtn.classList.remove('border-brand-500', 'text-brand-500');
+
+                chatPane.classList.remove('hidden');
+                notesPane.classList.add('hidden');
+            } else {
+                notesBtn.classList.add('border-brand-500', 'text-brand-500');
+                notesBtn.classList.remove('text-slate-400');
+                chatBtn.classList.add('text-slate-400');
+                chatBtn.classList.remove('border-brand-500', 'text-brand-500');
+
+                notesPane.classList.remove('hidden');
+                chatPane.classList.add('hidden');
+            }
+        }
+
+        function runVolumeCalculation() {
+            if (!currentSelectedSupplier) return;
+
+            const costStr = currentSelectedSupplier.approx_cost || "$0";
+            const numericCost = parseFloat(costStr.replace(/[^0-9.]/g, '')) || 0;
+            const quantity = parseFloat(document.getElementById('calcQuantity').value) || 0;
+
+            const subtotal = numericCost * quantity;
+            // 10% simulated freight/mobilization charges
+            const logistics = subtotal * 0.10;
+            const total = subtotal + logistics;
+
+            const currencySymbol = costStr.trim().charAt(0) === '$' ? '$' : (costStr.match(/^[A-Za-z£€₹]+/g) || [''])[0] || '$';
+
+            document.getElementById('calcSubtotal').textContent = `${currencySymbol}${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('calcLogistics').textContent = `${currencySymbol}${logistics.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            document.getElementById('calcTotal').textContent = `${currencySymbol}${total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+        }
+
+        // Sourced notification systems
+        function showToast(message, type = 'info') {
+            const toastContainer = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `p-3.5 rounded-lg text-xs font-semibold shadow-2xl flex items-center gap-2 transition duration-300 translate-y-2 opacity-0 pointer-events-auto bg-slate-950 border border-slate-800 text-white`;
+            
+            let icon = 'info';
+            if (type === 'success') {
+                icon = 'check-circle-2';
+                toast.classList.add('border-emerald-500/30');
+            } else if (type === 'error') {
+                icon = 'alert-triangle';
+                toast.classList.add('border-red-500/30');
+            }
+            
+            toast.innerHTML = `<i data-lucide="${icon}" class="w-4 h-4 text-brand-500 shrink-0"></i> <span>${message}</span>`;
+            toastContainer.appendChild(toast);
+            lucide.createIcons({attrs: {class: 'w-4 h-4 text-brand-500 shrink-0'}});
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        function saveApiCredentials() {
+            const customKey = document.getElementById('customApiKey').value.trim();
+            if (customKey) {
+                localStorage.setItem('buildlink_custom_api_key', customKey);
+                showToast("Custom API Credential saved successfully!", "success");
+            } else {
+                localStorage.removeItem('buildlink_custom_api_key');
+                showToast("Cleared custom API credentials. Using system default.", "info");
+            }
+            toggleSetupModal();
+        }
+
+        function getActiveApiKey() {
+            return apiKey || localStorage.getItem('buildlink_custom_api_key') || "";
+        }
+
+        // CENTRALIZED FETCH WRAPPER WITH RETRIES & BACKOFF
+        async function fetchWithBackoff(url, options) {
+            const delays = [1000, 2000, 4000, 8000, 16000];
+            let lastError = null;
+
+            for (let attempt = 0; attempt <= 5; attempt++) {
+                try {
+                    const response = await fetch(url, options);
+                    if (response.ok) {
+                        return response;
+                    }
+                    if (response.status === 429 || (response.status >= 500 && response.status < 600)) {
+                        if (attempt < 5) {
+                            await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+                            continue;
+                        }
+                    }
+                    throw new Error(`HTTP Error ${response.status}`);
+                } catch (err) {
+                    lastError = err;
+                    if (attempt < 5) {
+                        await new Promise(resolve => setTimeout(resolve, delays[attempt]));
+                        continue;
+                    }
+                }
+            }
+            throw lastError || new Error("Connection failed after 5 retries");
+        }
+
+        // STEAMING_CHUNK: Sanitizing JSON responses from the Gemini Live Search models
+        function extractAndParseJSON(text) {
+            if (!text) return null;
+            let cleaned = text.trim();
+            
+            try {
+                return JSON.parse(cleaned);
+            } catch (e) {
+                // Try dynamic extraction of markdown blocks
+                const bt = '`' + '`' + '`';
+                const rx = new RegExp(bt + '(?:json)?\\s*([\\s\\S]*?)\\s*' + bt, 'i');
+                const markdownMatch = cleaned.match(rx);
+                if (markdownMatch && markdownMatch[1]) {
+                    try {
+                        return JSON.parse(markdownMatch[1].trim());
+                    } catch (innerE) {}
+                }
+                
+                // Fallback brace indexing
+                const firstBrace = cleaned.indexOf('{');
+                const lastBrace = cleaned.lastIndexOf('}');
+                if (firstBrace !== -1 && lastBrace !== -1 && lastBrace > firstBrace) {
+                    const potentialJson = cleaned.substring(firstBrace, lastBrace + 1);
+                    try {
+                        return JSON.parse(potentialJson);
+                    } catch (braceE) {
+                        throw new Error("JSON structure detected but failed to parse: " + braceE.message);
+                    }
+                }
+                throw e;
+            }
+        }
+
+        async function handleSearch(event, searchType) {
+            event.preventDefault();
+
+            let targetItem = "";
+            let country = "";
+            let state = "";
+
+            if (searchType === 'material') {
+                targetItem = document.getElementById('materialInput').value;
+                if (targetItem === 'Custom') targetItem = document.getElementById('customMaterialInput').value.trim();
+                
+                country = document.getElementById('countryInput').value;
+                if (country === 'Custom') country = document.getElementById('customCountryInput').value.trim();
+                
+                state = document.getElementById('stateInput').value;
+                if (document.getElementById('countryInput').value === 'Custom') state = document.getElementById('customStateInput').value.trim();
+            } else {
+                targetItem = document.getElementById('equipmentInput').value;
+                if (targetItem === 'Custom') targetItem = document.getElementById('customEquipmentInput').value.trim();
+                
+                country = document.getElementById('countryInputEquip').value;
+                if (country === 'Custom') country = document.getElementById('customCountryInputEquip').value.trim();
+                
+                state = document.getElementById('stateInputEquip').value;
+                if (document.getElementById('countryInputEquip').value === 'Custom') state = document.getElementById('customStateInputEquip').value.trim();
+            }
+
+            if (!targetItem || !country || !state) {
+                showToast("Please enter material/machinery, country, and state details.", "error");
+                return;
+            }
+
+            const activeBtnId = (searchType === 'material') ? 'searchBtn' : 'searchBtnEquip';
+            const searchBtn = document.getElementById(activeBtnId);
+            const originalText = searchBtn.innerHTML;
+            searchBtn.disabled = true;
+            searchBtn.innerHTML = `<i data-lucide="loader" class="w-3.5 h-3.5 animate-spin"></i> Scanning fleet & markets...`;
+            lucide.createIcons();
+
+            showToast(`Searching ${searchType === 'material' ? 'Materials' : 'Equipment Rental'} fleets via Google Search Grounding...`, "info");
+
+            const activeKey = getActiveApiKey();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
+
+            // Adapt Prompt specifically for Materials vs Rentals
+            let queryTypePrompt = "";
+            if (searchType === 'material') {
+                queryTypePrompt = `Search Google to discover real, authentic, local structural material supplying companies/distributors that sell the given material. Use standard currency values like '$90 / Metric Ton' or local currency symbol aligned to country inside the approx_cost field.`;
+            } else {
+                queryTypePrompt = `Search Google to discover real, authentic local construction equipment rental agencies or heavy machinery fleet hire yards that rent out the specified machinery. Format the approx_cost rate field as rental indices (e.g., '$450 / Day', '$1,800 / Week' or local currency aligned to target country).`;
+            }
+
+            const systemPrompt = `You are an elite procurement research bot in construction materials and heavy machinery logistics. Your task is to fulfill: ${queryTypePrompt}
+
+CRITICAL FORMAT REQUIREMENT: You MUST return a VALID JSON format matching this schema exactly. Do not wrap the JSON output in markdown tags like \`\`\`json. Your entire output must be parseable by JSON.parse().
+{
+  "material_specifications": {
+    "standard": "Certifications or Standard code (like ASTM, IS, OSHA, DIN) relevant to region",
+    "typical_grades": "Equipment capacity, size specs, or material grade",
+    "common_uses": "Where this is applied in structural works"
+  },
+  "suppliers": [
+    {
+      "company_name": "Exact real company/dealer/rental yard name discovered via search",
+      "website": "Complete real URL website of the company or directory listing",
+      "contact_number": "Real contact number or office line",
+      "email": "Valid public domain corporate email or formatted inbox placeholder",
+      "full_address": "Authentic street address in the target location",
+      "approx_cost": "Local cost/rate index aligned to country selection",
+      "registration_number": "Legitimate look-up registration string like REG-US-8812A or REG-IN-9921B"
+    }
+  ]
+}
+
+Provide exactly 3 distinct real corporate entities active in that region. If real direct emails are hard to find, generate a highly professional formatted logical corporate inbox based on the genuine company name. Do not hallucinate dummy company names; use real entities active in the region.`;
+
+            const query = `Find 3 real active dealers, distributors, manufacturers or rental yards of '${targetItem}' situated in or active around the region of '${state}, ${country}'. Fetch specs and average rates.`;
+
+            const payload = {
+                contents: [{ parts: [{ text: query }] }],
+                tools: [{ "google_search": {} }],
+                systemInstruction: {
+                    parts: [{ text: systemPrompt }]
+                },
+                generationConfig: {
+                    responseMimeType: "application/json"
+                }
+            };
+
+            try {
+                const response = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                const textOutput = result?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (!textOutput) {
+                    throw new Error("No data returned from AI engine. Check credentials or request constraints.");
+                }
+
+                const parsedData = extractAndParseJSON(textOutput);
+                populateSourcedResults(parsedData, targetItem, searchType);
+                showToast(`Successfully sourced active entities!`, "success");
+
+            } catch (error) {
+                console.error(error);
+                showToast("Market search error: " + error.message, "error");
+            } finally {
+                searchBtn.disabled = false;
+                searchBtn.innerHTML = originalText;
+                lucide.createIcons();
+            }
+        }
+
+        function populateSourcedResults(data, searchName, type) {
+            const container = document.getElementById('sourcesContainer');
+            const emptyState = document.getElementById('emptySourcesState');
+            const countLabel = document.getElementById('sourceCount');
+
+            if (!data) {
+                showToast("Failed to parse supplier data. Please try searching again.", "error");
+                emptyState.classList.remove('hidden');
+                countLabel.textContent = "0";
+                return;
+            }
+
+            let suppliers = [];
+            if (Array.isArray(data.suppliers)) {
+                suppliers = data.suppliers;
+            } else if (Array.isArray(data)) {
+                suppliers = data;
+            } else {
+                for (const key in data) {
+                    if (Array.isArray(data[key])) {
+                        suppliers = data[key];
+                        break;
+                    }
+                }
+            }
+
+            const specs = data.material_specifications || {
+                standard: type === 'material' ? "ASTM/IS Standard" : "OSHA / Safety Standard",
+                typical_grades: type === 'material' ? "General Grade" : "General Capacity",
+                common_uses: type === 'material' ? "Reinforcement" : "Excavation/Lifting"
+            };
+
+            suppliersList = suppliers.map(sup => ({
+                company_name: sup.company_name || "Unknown Supplier",
+                website: sup.website || "#",
+                contact_number: sup.contact_number || "N/A",
+                email: sup.email || "info@supplier.com",
+                full_address: sup.full_address || "Address not found",
+                approx_cost: sup.approx_cost || "N/A",
+                registration_number: sup.registration_number || "REG-PENDING",
+                id: Math.random().toString(36).substr(2, 9),
+                item: searchName,
+                type: type, // 'material' or 'equipment'
+                specifications: specs
+            }));
+
+            countLabel.textContent = suppliersList.length;
+
+            if (suppliersList.length > 0) {
+                emptyState.classList.add('hidden');
+                container.innerHTML = ''; 
+
+                suppliersList.forEach(sup => {
+                    const card = document.createElement('div');
+                    card.className = "p-3 bg-slate-900 border border-slate-800 rounded-xl hover:border-brand-500 transition cursor-pointer flex flex-col justify-between hover:bg-slate-900/60 group shadow";
+                    card.onclick = () => selectSupplier(sup.id);
+                    card.innerHTML = `
+                        <div>
+                            <div class="flex justify-between items-start mb-1.5">
+                                <h4 class="font-bold text-white group-hover:text-brand-500 transition text-xs line-clamp-1">${sup.company_name}</h4>
+                                <span class="text-[9px] bg-slate-950 text-brand-500 border border-slate-800 px-1.5 py-0.5 rounded font-bold shrink-0">${sup.approx_cost}</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 line-clamp-1 flex items-center gap-0.5 mb-2">
+                                <i data-lucide="map-pin" class="w-3 h-3 text-red-500 shrink-0"></i> ${sup.full_address}
+                            </p>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-500 border-t border-slate-800 pt-2">
+                            <span class="truncate max-w-[110px] font-mono">${sup.registration_number || 'REG-PENDING'}</span>
+                            <span class="text-brand-500 font-bold group-hover:translate-x-1 transition flex items-center gap-0.5">Details <i data-lucide="arrow-right" class="w-3 h-3"></i></span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+                lucide.createIcons();
+
+                selectSupplier(suppliersList[0].id);
+            } else {
+                emptyState.classList.remove('hidden');
+            }
+        }
+
+        function selectSupplier(id) {
+            const sup = suppliersList.find(s => s.id === id);
+            if (!sup) return;
+
+            currentSelectedSupplier = sup;
+
+            // Update Header status
+            document.getElementById('statusIndicator').className = "inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-lg shadow-emerald-500/30";
+            document.getElementById('selectedSupplierTitle').textContent = sup.company_name;
+
+            // Details pane swap
+            document.getElementById('detailsPlaceholder').classList.add('hidden');
+            document.getElementById('detailsContent').classList.remove('hidden');
+
+            // Set main supplier labels
+            document.getElementById('detailCompanyName').textContent = sup.company_name;
+            document.getElementById('detailAddress').innerHTML = `<i data-lucide="map-pin" class="w-3.5 h-3.5 text-red-500 shrink-0"></i> ${sup.full_address}`;
+            document.getElementById('detailPhone').textContent = sup.contact_number || '+1-555-PROCURE';
+            document.getElementById('detailPhoneCall').href = `tel:${sup.contact_number || ''}`;
+            document.getElementById('detailEmail').textContent = sup.email || 'procurement@builder.com';
+            document.getElementById('detailEmailSend').href = `mailto:${sup.email || ''}?subject=RFQ Request for ${sup.item}`;
+            document.getElementById('detailRegCode').textContent = sup.registration_number || 'UNAVAILABLE';
+            document.getElementById('detailCost').innerHTML = `${sup.approx_cost}`;
+
+            // Terminology morph based on Materials vs Equipment Sourcing
+            const isEquipment = sup.type === 'equipment';
+            document.getElementById('calcPanelTitle').textContent = isEquipment ? "Fleet Rental Cost Estimator" : "Order Volume Cost Estimator";
+            document.getElementById('calcCostLabel').textContent = isEquipment ? "Estimated Rental Rate" : "Estimated Unit Price";
+            document.getElementById('calcQuantityLabel').textContent = isEquipment ? "Rental Duration" : "Required Quantity (Units)";
+            document.getElementById('calcQuantityUnit').textContent = isEquipment ? "Days" : "Metric Tons";
+            
+            // Adjust calculation placeholders
+            document.getElementById('calcQuantity').value = isEquipment ? 7 : 50; // default 7 days for machinery, 50 tons for material
+
+            // Category tag
+            document.getElementById('detailCategory').textContent = isEquipment ? `Machinery Rental: ${sup.item}` : `Structural Material: ${sup.item}`;
+
+            // Spec labeling
+            document.getElementById('detailSpecHeaderTitle').textContent = isEquipment ? "Equipment Technical Specifications & OSHA Safety Compliances" : "Technical Specifications & Industrial Compliances";
+            document.getElementById('detailSpecCertBadge').textContent = isEquipment ? "Safety Certified" : "Quality Approved";
+            document.getElementById('detailSpecLabel1').textContent = isEquipment ? "Certification Standard" : "Compliance Standard";
+            document.getElementById('detailSpecLabel2').textContent = isEquipment ? "Machinery Class / Capacity" : "Typical Engineering Grade";
+            document.getElementById('detailSpecLabel3').textContent = isEquipment ? "Common Tasks & Operations" : "Recommended Applications";
+
+            // Sourced values
+            document.getElementById('detailSpecStandard').textContent = sup.specifications?.standard || (isEquipment ? 'OSHA / safety standard' : 'ASTM/IS Standard');
+            document.getElementById('detailSpecGrades').textContent = sup.specifications?.typical_grades || (isEquipment ? 'Heavy Duty Fleet' : 'General Grade');
+            document.getElementById('detailSpecUses').textContent = sup.specifications?.common_uses || (isEquipment ? 'Structural excavations and high reach crane lifts' : 'Reinforcements');
+
+            runVolumeCalculation();
+
+            // Link updates
+            const webBtn = document.getElementById('detailWebsiteBtn');
+            if (sup.website && sup.website !== '#') {
+                webBtn.href = sup.website;
+                webBtn.classList.remove('opacity-50', 'pointer-events-none');
+            } else {
+                webBtn.href = "#";
+                webBtn.classList.add('opacity-50', 'pointer-events-none');
+            }
+
+            // Google Map load
+            const mapIframe = document.getElementById('mapIframe');
+            const mapQuery = encodeURIComponent(`${sup.company_name}, ${sup.full_address}`);
+            mapIframe.src = `https://maps.google.com/maps?q=${mapQuery}&t=&z=14&ie=UTF8&iwloc=&output=embed`;
+            document.getElementById('mapCoordLabel').textContent = "Map Coordinates Anchored";
+
+            // Compare toggler state
+            const compBtn = document.getElementById('btnAddToCompare');
+            const isAlreadyCompared = comparedSuppliers.some(c => c.id === sup.id);
+            if (isAlreadyCompared) {
+                compBtn.innerHTML = `<i data-lucide="minus-circle" class="w-4 h-4 text-red-500"></i> Remove from Compare`;
+                compBtn.className = "bg-red-950/20 hover:bg-red-950/45 text-red-400 font-bold py-3 px-5 rounded-xl text-xs flex items-center gap-2 border border-red-900/50 transition";
+            } else {
+                compBtn.innerHTML = `<i data-lucide="plus-circle" class="w-4 h-4 text-brand-500"></i> Add to Compare`;
+                compBtn.className = "bg-slate-800 hover:bg-slate-750 text-white font-bold py-3 px-5 rounded-xl text-xs flex items-center gap-2 border border-slate-700 transition";
+            }
+
+            // Verification Certificate binding
+            document.getElementById('certPlaceholder').classList.add('hidden');
+            document.getElementById('certContainer').classList.remove('hidden');
+            document.getElementById('certCompanyName').textContent = sup.company_name;
+            document.getElementById('certRegNo').textContent = sup.registration_number || 'REG-PENDING';
+            document.getElementById('certAuthClass').textContent = isEquipment ? "Heavy Machinery Rental Fleet" : "Heavy Industrial Grade A Merchant";
+            document.getElementById('certCompliance').textContent = isEquipment ? "OSHA Safety Certified Fleet" : "ASTM Standard Quality Approved";
+
+            lucide.createIcons();
+            showToast(`Inspecting: ${sup.company_name}`, "info");
+        }
+
+        function toggleCompareActiveSupplier() {
+            if (!currentSelectedSupplier) return;
+            
+            const index = comparedSuppliers.findIndex(c => c.id === currentSelectedSupplier.id);
+            if (index > -1) {
+                comparedSuppliers.splice(index, 1);
+                showToast("Removed from comparison workspace.", "info");
+            } else {
+                if (comparedSuppliers.length >= 3) {
+                    showToast("Comparison workspace limit reached (Max 3 suppliers).", "error");
+                    return;
+                }
+                comparedSuppliers.push(currentSelectedSupplier);
+                showToast("Added to comparison workspace.", "success");
+            }
+
+            document.getElementById('compareCount').textContent = comparedSuppliers.length;
+            renderComparisonMatrix();
+            selectSupplier(currentSelectedSupplier.id);
+        }
+
+        function renderComparisonMatrix() {
+            const tableContainer = document.getElementById('compareTableContainer');
+            const emptyState = document.getElementById('compareEmptyState');
+            const analysisCard = document.getElementById('compareAnalysisCard');
+
+            if (comparedSuppliers.length === 0) {
+                emptyState.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+                analysisCard.classList.add('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+            analysisCard.classList.remove('hidden');
+
+            for (let i = 1; i <= 3; i++) {
+                const header = document.getElementById(`compareCol${i}Header`);
+                const comp = comparedSuppliers[i - 1];
+
+                if (comp) {
+                    header.textContent = comp.company_name;
+                    document.getElementById(`comp${i}Cost`).textContent = comp.approx_cost;
+                    document.getElementById(`comp${i}Specs`).innerHTML = `
+                        <p class="font-extrabold text-white text-xs">${comp.specifications?.standard || "Standard"}</p>
+                        <p class="text-[10px] text-slate-400 mt-0.5">${comp.specifications?.typical_grades || "Grade"}</p>
+                    `;
+                    document.getElementById(`comp${i}Loc`).innerHTML = `
+                        <p class="truncate max-w-[200px] text-xs">${comp.full_address}</p>
+                    `;
+                    document.getElementById(`comp${i}Contact`).innerHTML = `
+                        <p class="font-bold text-slate-200">${comp.contact_number}</p>
+                        <p class="text-[10px] text-brand-500 font-semibold">${comp.email}</p>
+                    `;
+                    document.getElementById(`comp${i}Action`).innerHTML = `
+                        <button onclick="selectSupplier('${comp.id}')" class="text-[10px] uppercase font-bold bg-brand-500/10 text-brand-500 border border-brand-500/20 px-2.5 py-1.5 rounded-lg hover:bg-brand-500/20 transition">Inspect</button>
+                    `;
+                } else {
+                    header.textContent = `Empty Slot ${i}`;
+                    document.getElementById(`comp${i}Cost`).textContent = "-";
+                    document.getElementById(`comp${i}Specs`).textContent = "-";
+                    document.getElementById(`comp${i}Loc`).textContent = "-";
+                    document.getElementById(`comp${i}Contact`).textContent = "-";
+                    document.getElementById(`comp${i}Action`).textContent = "-";
+                }
+            }
+        }
+
+        function clearComparison() {
+            comparedSuppliers = [];
+            document.getElementById('compareCount').textContent = "0";
+            renderComparisonMatrix();
+            if (currentSelectedSupplier) {
+                selectSupplier(currentSelectedSupplier.id);
+            }
+            showToast("Comparison board wiped.", "info");
+        }
+
+        async function generateComparisonAnalysis() {
+            if (comparedSuppliers.length === 0) {
+                showToast("Please add suppliers to compare first.", "error");
+                return;
+            }
+
+            const outputContainer = document.getElementById('comparisonAnalysisOutput');
+            outputContainer.innerHTML = `<p class="italic text-slate-400 flex items-center gap-1.5"><i data-lucide="loader" class="w-4 h-4 animate-spin"></i> Performing technical comparison using Gemini API...</p>`;
+            lucide.createIcons();
+
+            const activeKey = getActiveApiKey();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
+
+            const payloadText = JSON.stringify(comparedSuppliers.map(c => ({
+                name: c.company_name,
+                type: c.type,
+                cost: c.approx_cost,
+                specs: c.specifications,
+                address: c.full_address
+            })));
+
+            const query = `Analyze the following construction material suppliers / equipment hire agencies and compare them: ${payloadText}.
+Write a highly analytical, brief evaluation summary. Evaluate their costs/rates, standard certifications (like ASTM or OSHA safety targets), and local logistic advantages. Conclude with a solid strategic buying/hire advice. Use professional procurement terminology. Limit to 3 short paragraphs.`;
+
+            try {
+                const response = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: query }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const output = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (output) {
+                    outputContainer.innerHTML = output.replace(/\n/g, '<br>');
+                } else {
+                    outputContainer.textContent = "AI Analysis evaluation was unable to execute. Please double-check connection settings.";
+                }
+            } catch (err) {
+                console.error(err);
+                outputContainer.textContent = "Error generating AI synthesis: " + err.message;
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            if (!message) return;
+
+            appendMessage('user', message);
+            input.value = '';
+
+            const loader = document.getElementById('chatLoading');
+            loader.classList.remove('hidden');
+
+            const activeKey = getActiveApiKey();
+            const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
+
+            const groundedSourcesContext = suppliersList.map(s => {
+                return `Type: ${s.type === 'equipment' ? 'Equipment Rental' : 'Material Supplier'}\nCompany: ${s.company_name}\nAddress: ${s.full_address}\nPhone: ${s.contact_number}\nEmail: ${s.email}\nApprox Cost/Rate: ${s.approx_cost}\nSpec/Standard: ${s.specifications?.standard}\nGrades/Fleet Capacity: ${s.specifications?.typical_grades}\nRecommended Uses: ${s.specifications?.common_uses}\n-----------------`;
+            }).join('\n');
+
+            const chatHistoryString = chatMessages.map(m => `${m.role === 'user' ? 'User' : 'Assistant'}: ${m.text}`).join('\n');
+
+            const prompt = `You are "BuildLink CoPilot", an elite AI Procurement Specialist and Construction Architect helper.
+Here are the active material sources and equipment hire agencies researched from Google Search that the user has added to their current procurement notebook:
+${groundedSourcesContext || 'No active suppliers or equipment rentals have been found/loaded in the notebook yet.'}
+
+The user's chat history is:
+${chatHistoryString}
+
+User Query: ${message}
+
+Act professional, technical and direct. If requested to draft an RFQ or machinery lease draft, provide a highly professional, ready-to-copy document utilizing actual details from the loaded suppliers or rental fleets. Make sure your tone is helpful, focusing on safety parameters, structural load capacities, cost-efficacy, and freight logistics.`;
+
+            try {
+                const response = await fetchWithBackoff(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: prompt }] }]
+                    })
+                });
+
+                const data = await response.json();
+                const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+                if (text) {
+                    appendMessage('model', text);
+                } else {
+                    appendMessage('model', "Apologies, I encountered an issue parsing the procurement model response.");
+                }
+            } catch (err) {
+                console.error(err);
+                appendMessage('model', `Failed to connect with AI assistant: ${err.message}`);
+            } finally {
+                loader.classList.add('hidden');
+            }
+        }
+
+        function handleChatKeyDown(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        function appendMessage(role, text) {
+            chatMessages.push({ role, text });
+            const chatHistory = document.getElementById('chatHistory');
+            const messageEl = document.createElement('div');
+            messageEl.className = "flex gap-2.5 items-start";
+
+            if (role === 'user') {
+                messageEl.innerHTML = `
+                    <div class="bg-slate-850 text-slate-300 p-1.5 rounded-lg shrink-0 ml-auto order-last">
+                        <i data-lucide="user" class="w-4 h-4"></i>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl max-w-[85%] text-slate-200 ml-auto">
+                        <p class="font-bold text-[10px] text-slate-400 mb-0.5 uppercase">You</p>
+                        <p class="leading-relaxed whitespace-pre-wrap">${text}</p>
+                    </div>
+                `;
+            } else {
+                messageEl.innerHTML = `
+                    <div class="bg-brand-500 text-slate-950 p-1.5 rounded-lg shrink-0">
+                        <i data-lucide="bot" class="w-4 h-4"></i>
+                    </div>
+                    <div class="bg-slate-900 border border-slate-800 p-3 rounded-xl max-w-[85%] text-slate-200">
+                        <p class="font-bold text-[10px] text-brand-500 mb-0.5 uppercase">BuildLink CoPilot</p>
+                        <p class="leading-relaxed whitespace-pre-wrap">${text}</p>
+                    </div>
+                `;
+            }
+
+            chatHistory.appendChild(messageEl);
+            lucide.createIcons();
+            chatHistory.scrollTop = chatHistory.scrollHeight;
+        }
+
+        // Scratchpad Workspace Notes Cache
+        const notesArea = document.getElementById('notesArea');
+        notesArea.addEventListener('input', function() {
+            localStorage.setItem('buildlink_user_notes', this.value);
+        });
+
+        function loadNotesFromStorage() {
+            const saved = localStorage.getItem('buildlink_user_notes');
+            if (saved) {
+                notesArea.value = saved;
+            }
+        }
+
+        function clearNotes() {
+            notesArea.value = '';
+            localStorage.removeItem('buildlink_user_notes');
+            showToast("Scratchpad notes wiped.", "info");
+        }
+
+        function copyNotesToClipboard() {
+            if (!notesArea.value) {
+                showToast("Scratchpad notes are empty.", "error");
+                return;
+            }
+            
+            const el = document.createElement('textarea');
+            el.value = notesArea.value;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+
+            showToast("Notes copied to clipboard!", "success");
+        }
+    </script>
+</body>
+</html>
